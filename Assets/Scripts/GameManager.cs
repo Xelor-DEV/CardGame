@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -11,7 +12,7 @@ public class GameManager : MonoBehaviour
     public CardInfoSO[] cardPool;
     public GameObject card;
     public GameObject cardField;
-    //public GameObject winPanel;
+    public GameObject winPanel;
     private List<GameObject> cards = new List<GameObject>();
     private List<Button> buttons = new List<Button>();
 
@@ -24,19 +25,21 @@ public class GameManager : MonoBehaviour
     private int matches;
     private int totalMatches;
 
-    //public AudioSource mainAudioSource;
-    //public AudioSource audioSourceone;
-    //public AudioSource audioSourcetwo;
-    //public AudioClip goodAudio;
-    //public AudioClip wrongAudio;
+    [SerializeField] private string scene;
+
+    public AudioSource mainAudioSource;
+    public AudioSource audioSourceone;
+    public AudioSource audioSourcetwo;
+    public AudioClip goodAudio;
+    public AudioClip wrongAudio;
 
    
     void Start()
     {
         totalMatches = cardPool.Length;
-        for (int i = 0; i < cardPool.Length; i++)
+        for (int i = 0; i < cardPool.Length; ++i)
         {
-            for (int l = 0; l < 2; l++)
+            for (int l = 0; l < 2; ++l)
             {
                 GameObject go = Instantiate(card, cardField.transform, false);
                 go.GetComponent<Card>().Initialize(cardPool[i].index, cardPool[i].sprite, backcardSprite);
@@ -47,22 +50,22 @@ public class GameManager : MonoBehaviour
         List<GameObject> cardscopy = new List<GameObject>();
         List<GameObject> displaycards = new List<GameObject>();
 
-        for (int i = 0; i < cards.Count; i++)
+        for (int i = 0; i < cards.Count; ++i)
         {
             cardscopy.Add(cards[i]);
         }
-        for (int i = 0; i < cards.Count; i++)
+        for (int i = 0; i < cards.Count; ++i)
         {
             int x = UnityEngine.Random.Range(0, cardscopy.Count);
             displaycards.Add(cardscopy[x]);
             cardscopy.RemoveAt(x);
         }
-        for (int i = 0; i < cards.Count; i++)
+        for (int i = 0; i < cards.Count; ++i)
         {
             cards[i] = displaycards[i];
             cards[i].transform.SetSiblingIndex(i);
         }
-        for (int i = 0; i < cards.Count; i++)
+        for (int i = 0; i < cards.Count; ++i)
         {
             Button btn = cards[i].gameObject.GetComponent<Button>();
             buttons.Add(btn);
@@ -92,13 +95,13 @@ public class GameManager : MonoBehaviour
             {
                 firstGuess = true;
                 firstchoise = UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject.GetComponent<Card>();
-                //audioSourceone.Play();
+                audioSourceone.Play();
             }
             else if (!secondGuess)
             {
                 secondGuess = true;
                 secondchoise = UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject.GetComponent<Card>();
-                //audioSourcetwo.Play();
+                audioSourcetwo.Play();
             }
         }
         if (index == 2)
@@ -121,22 +124,30 @@ public class GameManager : MonoBehaviour
                 matches++;
                 firstchoise.btn.interactable = false;
                 secondchoise.btn.interactable = false;
-                //mainAudioSource.PlayOneShot(goodAudio);
+                mainAudioSource.PlayOneShot(goodAudio);
             }
         }
         else
         {
             firstchoise.Flip();
             secondchoise.Flip();
-            //mainAudioSource.PlayOneShot(wrongAudio);
+            mainAudioSource.PlayOneShot(wrongAudio);
         }
         index = 0;
         evaluating = false;
+        Win();
+    }
+    public void Win()
+    {
 
         if (matches == totalMatches)
         {
-            print("Win");
-            //winPanel.gameObject.SetActive(true);
+            winPanel.gameObject.SetActive(true);
         }
+
+    }
+    public void RestartGame()
+    {
+        SceneManager.LoadScene(scene);
     }
 }
