@@ -10,8 +10,9 @@ public class Card : MonoBehaviour
     public Sprite frontSprite;
     public Sprite backSprite;
     [SerializeField] private int _index;
-    [SerializeField] private bool _isFlipped = true;
-    [SerializeField] private bool _isPaired = false;
+    [SerializeField] private bool isFlipped = true;
+    [SerializeField] private bool isPaired = false;
+
     public void Initialize(int index, Sprite front, Sprite back)
     {
         _index = index;
@@ -19,23 +20,26 @@ public class Card : MonoBehaviour
         btn = GetComponent<Button>();
         frontSprite = front;
         backSprite = back;
+
         Flip();
     }
+
     public void Flip()
     {
-        _isFlipped = !_isFlipped;
-        img.sprite = _isFlipped ? frontSprite : backSprite;
+        isFlipped = !isFlipped;
+        img.sprite = isFlipped ? frontSprite : backSprite;
     }
+
     public int Index()
     {
         return _index;
     }
     public void SetPair()
     {
-        _isPaired = true;
+        isPaired = true;
     }
     public bool IsPaired()
     {
-        return _isPaired;
+        return isPaired;
     }
 }
