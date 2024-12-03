@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using TMPro;
 
 public class GameManager : MonoBehaviour
 {
@@ -15,7 +16,6 @@ public class GameManager : MonoBehaviour
     public GameObject winPanel;
     private List<GameObject> cards = new List<GameObject>();
     private List<Button> buttons = new List<Button>();
-
 
     private int index;
     private Card firstchoise;
@@ -33,9 +33,23 @@ public class GameManager : MonoBehaviour
     public AudioClip goodAudio;
     public AudioClip wrongAudio;
 
-   
+    // Variables para el tiempo transcurrido
+    private float elapsedTime;
+    public TMP_Text elapsedTimeText;
+    public TMP_Text winTimeText;
+    public DBScoreSender dBScoreSender;
+    public UserSessionData userSessionData;
+
+    
+    public void ReceiveUserId(string userID)
+    {
+        userSessionData.userId = int.Parse(userID);
+        Debug.Log("user id: " + userID);
+    }
+
     void Start()
     {
+        Time.timeScale = 1;
         totalMatches = cardPool.Length;
         for (int i = 0; i < cardPool.Length; ++i)
         {
@@ -72,7 +86,12 @@ public class GameManager : MonoBehaviour
         }
         AddListeners();
 
+        // Iniciar el tiempo transcurrido
+        elapsedTime = 0f;
+        elapsedTimeText.text = "Time: " + Mathf.FloorToInt(elapsedTime).ToString() + "s";
+        StartCoroutine(UpdateElapsedTime());
     }
+
     void AddListeners()
     {
         foreach (Button btn in buttons)
@@ -137,15 +156,31 @@ public class GameManager : MonoBehaviour
         evaluating = false;
         Win();
     }
-    public void Win()
+
+    private IEnumerator UpdateElapsedTime()
     {
-
-        if (matches == totalMatches)
+        while (true)
         {
-            winPanel.gameObject.SetActive(true);
+            yield return new WaitForSeconds(1f);
+            elapsedTime += 1f;
+            elapsedTimeText.text = "Time: " + Mathf.FloorToInt(elapsedTime).ToString() + "s";
         }
-
     }
+
+    public void Win()
+{
+    if (matches == totalMatches)
+    {
+        Time.timeScale = 0;
+        winPanel.gameObject.SetActive(true);
+        winTimeText.text = "You completed the game in: " + Mathf.FloorToInt(elapsedTime).ToString() + " seconds";
+        StopCoroutine(UpdateElapsedTime());
+
+        // Llamar al método SendScoreToDatabase
+        dBScoreSender.SendScoreToDatabase(Mathf.FloorToInt(elapsedTime), userSessionData.userId);
+    }
+}
+
     public void RestartGame()
     {
         SceneManager.LoadScene(scene);
